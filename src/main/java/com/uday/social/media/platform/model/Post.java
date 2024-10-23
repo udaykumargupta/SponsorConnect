@@ -19,7 +19,7 @@ public class Post {
 
     private String content;
 
-    @OneToMany(mappedBy = "posts",cascade =CascadeType.ALL)
+    @OneToMany(mappedBy = "post",cascade =CascadeType.ALL)
     private List<Like>likes=new ArrayList<>();
 
     @OneToMany
