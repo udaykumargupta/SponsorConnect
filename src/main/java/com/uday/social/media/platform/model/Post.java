@@ -39,6 +39,6 @@ public class Post {
     private boolean isReply;
     private boolean isPost;
 
-    private LocalDateTime CreatedAt;
+    private LocalDateTime createdAt;
 
 }

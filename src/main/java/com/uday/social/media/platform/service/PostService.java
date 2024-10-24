@@ -14,13 +14,13 @@ public interface PostService {
 
     public List<Post> findAllPost();
 
-    public Post rePost(Long PostId,User user)throws UserException, PostException;
+    public Post rePost(Long postId,User user)throws UserException, PostException;
 
-    public Post findById(Long PostId) throws PostException;
+    public Post findById(Long postId) throws PostException;
 
-    public void deletePostById(Long PostId ,Long userId) throws PostException ,UserException;
+    public void deletePostById(Long postId ,Long userId) throws PostException ,UserException;
 
-    public Post removeFromRepost(Long PostId,User user) throws PostException ,UserException;
+    public Post removeFromRepost(Long postId,User user) throws PostException ,UserException;
 
     public Post createdReply(PostReplyRequest req, User user) throws PostException;
 

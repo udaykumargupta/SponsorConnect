@@ -15,11 +15,12 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
     List<Post>findByRePostUserContainsOrUser_IdAndIsPostTrueOrderByCreatedAtDesc(User user,Long userId);
 
-
     List<Post>findByLikesContainingOrderByCreatedAtDesc(User user);
 
-    @Query("Select from Post p JSON p.like l where l.user.id=userId")
+    @Query("SELECT p FROM Post p JOIN p.likes l WHERE l.user.id = :userId ORDER BY p.createdAt DESC")
+
     List<Post>findByLikesUser_Id(Long userId);
+
 
 
 }

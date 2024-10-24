@@ -10,9 +10,9 @@ import java.util.List;
 public interface LikeRepository extends JpaRepository<Like,Long> {
 
     @Query("SELECT l FROM Like l WHERE l.user.id=:userId AND l.post.id=:postId")
-    public Like isLikExist(@Param("userId")Long userId,@Param("postId")Long postId);
+    public Like isLikeExist(@Param("userId")Long userId,@Param("postId")Long postId);
 
-    @Query("SELECT l FROM like l where l.post.id=:postId")
+    @Query("SELECT l FROM Like l where l.post.id=:postId")
     public List<Like>findByPostId(@Param("postId")Long postId);
 
 }
