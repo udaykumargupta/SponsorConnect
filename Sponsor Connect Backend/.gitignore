@@ -1,4 +1,4 @@
-HELP.md
+../HELP.md
 target/
 !Sponsor Connect Backend/.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
