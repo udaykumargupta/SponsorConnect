@@ -3,7 +3,7 @@ import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import { useNavigate } from "react-router-dom";
 import PostCard from "../HomeSection/PostCard";
 import { Divider } from "@mui/material";
-import { Margin } from "@mui/icons-material";
+
 
 const PostDetails = () => {
   const navigate = useNavigate();

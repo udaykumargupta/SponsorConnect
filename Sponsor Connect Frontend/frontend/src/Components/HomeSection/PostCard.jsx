@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import RepeatIcon from "@mui/icons-material/Repeat";
 import { Avatar, Button, Menu, MenuItem } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -8,9 +8,13 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import ReplyModal from "./ReplyModal";
 const PostCard = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+    const [openReplyModal,setOpenReplyModal]=useState(false);
+      const handleOpenReplyModel = () => setOpenReplyModal(true);
+      const handleCloseReplyModal = () => setOpenReplyModal(false);
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -23,9 +27,6 @@ const PostCard = () => {
     handleClose();
   };
 
-  const handleOpenReplyModel = () => {
-    console.log("open model");
-  };
   const handleCreateRePost = () => {
     console.log("handle create rePost");
   };
@@ -33,7 +34,7 @@ const PostCard = () => {
     console.log("handle create like post");
   };
   return (
-    <div className="">
+    <React.Fragment>
       {/* <div className="flex items-center font-semibold text-gray-700 py-2">
         <RepeatIcon></RepeatIcon>
       </div> */}
@@ -148,7 +149,10 @@ const PostCard = () => {
         </div>
       </div>
     </div>
-    </div>
+    <section>
+      <ReplyModal open={openReplyModal} handleClose={handleCloseReplyModal}></ReplyModal>
+    </section>
+    </React.Fragment>
   );
 };
 
