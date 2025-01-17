@@ -11,7 +11,7 @@ import PendingIcon from "@mui/icons-material/Pending";
 export const navigationMenu = [
   {
     title: "Home",
-    icon: <HomeIcon />,
+    icon: <HomeIcon/>,
     path: "/home",
   },
   {

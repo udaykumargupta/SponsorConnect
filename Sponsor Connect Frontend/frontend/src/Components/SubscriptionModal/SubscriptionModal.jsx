@@ -5,31 +5,31 @@ import Modal from "@mui/material/Modal";
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
-import { array } from "yup";
 
 const style = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 600,
+  width: "90%",
+  maxWidth: "600px",
   bgcolor: "background.paper",
   border: "none",
   boxShadow: 24,
   p: 4,
-  borderRadius: 4,
+  borderRadius: 8,
   outline: "none",
 };
+
 const features = [
   "Prioritized ranking in communication and search",
   "Personalized suggestions",
   "Unlimited direct messages to sponsors and other users",
-  "better reach",
+  "Better reach",
   "Post longer videos and 1080p video uploads",
 ];
 
-export default function SubscriptionModal({handleClose,open}) {
-
+export default function SubscriptionModal({ handleClose, open }) {
   const [plan, setPlan] = React.useState("Annually");
 
   return (
@@ -41,25 +41,23 @@ export default function SubscriptionModal({handleClose,open}) {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <div className="flex item-center space-x-3">
-            <IconButton onClick={handleClose} aria-label="delete">
-              <CloseIcon></CloseIcon>
+          <div className="flex justify-end">
+            <IconButton onClick={handleClose}>
+              <CloseIcon />
             </IconButton>
           </div>
-          <div className="flex justify-center py-10">
-            <div className="w-[80%] space-y-10">
-              <div className="p-5 rounded-md flex items-center justify-between bg-slate-400">
-                <h1 className="text-xl pr-5">
-                  Blue subscribers with a verified phone number will get a blue
-                  checkmark once approved.
-                </h1>
-                <img
-                  className="w-24 h-24"
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQVJEnRacu1ORJdVZNsLVzpL1LC-p5PGRACww&s"
-                  alt=""
-                ></img>
-              </div>
-              <div className="flex justify-between border rounded-full px-5 py-3 border-gray-500">
+          <div className="text-center space-y-6">
+            <div className="bg-blue-100 p-5 rounded-md flex items-center justify-between">
+              <p className="text-xl font-medium text-gray-800">
+              Premium members are 2.6x more likely to get Sponsors on average.
+              </p>
+              <img
+                className="w-14 h-14"
+                src="https://media.licdn.com/dms/image/v2/C4D0BAQF0iTIdJ2jiCw/company-logo_200_200/company-logo_200_200/0/1630555083881/sponsor_connect1_logo?e=2147483647&v=beta&t=dRReOIWqhECaTwTbDz69oN02zYOZh8L7ObTLkiL1Heo"
+                alt="checkmark"
+              />
+            </div>
+            <div className="flex justify-between border rounded-full px-5 py-3 border-gray-500">
                 <div>
                   <span
                     onClick={() => setPlan("Annually")}
@@ -80,21 +78,22 @@ export default function SubscriptionModal({handleClose,open}) {
                   Monthly
                 </p>
               </div>
-              <div className="space-y-3">
-                {features.map((item) => (
-                  <div className="flex items-center space-x-5">
-                    <FiberManualRecordIcon
-                      sx={{ width: "7px", height: "7px" }}
-                    />
-                    <p className="text-xs">{item}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="cursor-pointer flex justify-center bg-gray-900 text-white rounded-full px-5 py-3">
-                <span className="line-through italic">
-                ₹4900.00
-                </span>
-                <span className="px-5">₹3000/year</span>
+            <div className="space-y-4 text-left">
+              <p>Claim your 1-month free trial today. Cancel anytime. We’ll send you a reminder 7 days before your trial ends.</p>
+              {features.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex items-center text-gray-700 text-sm space-x-3"
+                >
+                  <FiberManualRecordIcon sx={{ width: "7px", height: "7px" }} />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+            <div className="text-center">
+              <div className="bg-gray-900 text-white text-sm rounded-full px-5 py-3 inline-block cursor-pointer">
+                <span className="line-through italic mr-4">₹4900.00</span>
+                <span className="font-semibold">₹3000/year</span>
               </div>
             </div>
           </div>

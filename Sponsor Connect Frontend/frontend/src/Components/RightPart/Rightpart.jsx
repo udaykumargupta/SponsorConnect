@@ -1,67 +1,80 @@
 import React from "react";
-import SearchIcon from "@mui/icons-material/Search";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
 import { Button } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import SubscriptionModal from "../SubscriptionModal/SubscriptionModal";
 
 const Rightpart = () => {
-  const [openSubscriptionModel, setOpenSubscriptionModel] = React.useState(false);
+  const [openSubscriptionModel, setOpenSubscriptionModel] =
+    React.useState(false);
   const handleOpenSubscriptionModel = () => setOpenSubscriptionModel(true);
   const handleCloseSubscriptionModel = () => setOpenSubscriptionModel(false);
-  const handleChangeTheme = () => {
-    console.log("handle change theme");
-  };
 
   return (
-    <div className="py-5 sticky top-0 left-0 w-full"> {/* Ensures full width and left alignment */}
-      <div className="relative flex items-center">
-        <input
-          type="text"
-          className="py-3 rounded-full text-gray-500 w-full pl-12"
-        />
-        <div className="absolute top-0 left-0 pl-3 pt-3">
-          <SearchIcon className="text-gray-500" />
-        </div>
-        <Brightness4Icon
-          className="ml-3 cursor-pointer"
-          onClick={handleChangeTheme}
-        />
-      </div>
+    <div className="hideScrollBar py-1 sticky top-0 left-0 w-full bg-white shadow-md rounded-lg overflow-hidden">
+      {/* Get Verified Section */}
+      <section className="my-5 p-6 border border-gray-800 bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300">
+        <h1 className="text-2xl font-semibold text-grey-900">       Get Verified</h1>
+        <h2 className="font-medium my-2 text-gray-600">
+          Unlock your full potential with SponsorConnect Premium
+        </h2>
 
-      <section className="my-5">
-        <h1 className="text-xl font-bold text-left">Get Verified</h1>
-        <h1 className="font-bold my-2 text-left">Subscribe to unlock new features</h1>
         <Button
-          variant="contained"
-          sx={{ padding: "10px", paddingX: "20px", borderRadius: "25px"}}
+          // variant="contained"
+          sx={{
+            padding: "12px",
+            paddingX: "24px",
+            borderRadius: "30px",
+            color: "blue",
+            bgcolor: "white",
+            border: "2px solid #1E88E5", 
+            "&:hover": {
+              borderColor:"green", 
+              color: "green-700", 
+            },
+          }}
+          
           onClick={handleOpenSubscriptionModel}
         >
-          Get Verified
+          Try for free!
         </Button>
       </section>
 
-      <section className="mt-7 space-y-5">
-        <h1 className="font-bold text-xl py-1 text-left">Top Sponsors / Trending</h1>
+      {/* Top Sponsors / Trending Section */}
+      <section className="mt-7 space-y-5 p-4">
+        <h1 className="font-semibold text-2xl text-left text-gray-800">
+          Trending Now
+        </h1>
 
         <div>
-          <p className="text-sm text-left">TaTa is sponsoring chess player</p>
-          <p className="font-bold text-left">Pragg got sponsor from Adani Group</p>
+          <p className="text-sm text-left text-gray-600">
+            TaTa is sponsoring chess player
+          </p>
+          <p className="font-semibold text-left text-gray-800">
+            Pragg got sponsor from Adani Group
+          </p>
         </div>
 
-        { [1,1,1].map((item, index) => (
-          <div key={index} className="flex justify-between w-full text-left"> {/* Added text-left class for left alignment */}
+        {[1, 1, 1].map((item, index) => (
+          <div
+            key={index}
+            className="flex justify-between items-center w-full text-left border-b border-gray-200 py-4"
+          >
             <div>
-              <p className="text-sm">Entertainment . Trending</p>
-              <p className="font-bold">#Hotstar</p>
-              <p>34.3K RePosts</p>
+              <p className="text-sm text-gray-500">Entertainment . Trending</p>
+              <p className="font-semibold text-gray-800">#Hotstar</p>
+              <p className="text-gray-500">34.3K RePosts</p>
             </div>
-            <MoreHorizIcon />
+            <MoreHorizIcon className="text-gray-600 hover:text-blue-500 transition-all duration-300 cursor-pointer" />
           </div>
         ))}
       </section>
+
+      {/* Subscription Modal */}
       <section>
-        <SubscriptionModal open={openSubscriptionModel} handleClose={handleCloseSubscriptionModel}></SubscriptionModal>
+        <SubscriptionModal
+          open={openSubscriptionModel}
+          handleClose={handleCloseSubscriptionModel}
+        />
       </section>
     </div>
   );

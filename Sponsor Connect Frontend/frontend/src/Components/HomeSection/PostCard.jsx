@@ -85,13 +85,13 @@ const PostCard = () => {
                 Sponsor Connect-Full Stack project with spring boot and react
               </p>
               <img
-                className="w-[28rem] border"
+                className="w-[32rem] border"
                 src="https://avatars.githubusercontent.com/u/122539779?v=4"
                 alt=""
               ></img>
             </div>
-            <div className="py-5 flex flex-wrap justify-between items-center">
-            <div className="space-x-3 flex items-center text-gray-600">
+            <div className="py-5 flex flex-wrap justify-around items-center">
+            <div className="space-x-3 flex items-center text-gray-800">
               <ChatBubbleOutlineIcon
                 className="cursor-pointer"
                 onClick={handleOpenReplyModel}
