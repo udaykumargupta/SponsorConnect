@@ -2,7 +2,6 @@ import { Avatar, Button } from "@mui/material";
 import { useFormik } from "formik";
 import React, { useState } from "react";
 import * as Yup from "yup";
-import ImageIcon from "@mui/icons-material/Image";
 import FmdGoodIcon from "@mui/icons-material/FmdGood";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
 import PostCard from "./PostCard";

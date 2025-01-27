@@ -10,13 +10,16 @@ import PostDetails from "../PostDetails/PostDetails";
 import SearchIcon from "@mui/icons-material/Search";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import { Avatar, Button, Menu, MenuItem } from "@mui/material";
-import { blue } from "@mui/material/colors";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import Authentication from "../Authentication/Authentication";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../../Store/Auth/Action";
 
 const HomePage = () => {
+  const { auth } = useSelector(store=>store);
   const handleChangeTheme = () => {
     console.log("handle change theme");
   };
+  const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -29,6 +32,7 @@ const HomePage = () => {
   const handleLogout = () => {
     console.log("logout");
     handleClose();
+    dispatch(logout());
   };
 
   return (
@@ -99,8 +103,10 @@ const HomePage = () => {
             >
               <MenuItem>
                 <div>
-                  <div className="font-bold">Uday Gupta</div>
-                  <div className="text-sm text-gray-500">uday@example.com</div>
+                  <div className="font-bold">{auth.user?.fullName}</div>
+                  <div className="text-sm text-gray-500">
+                    @{auth.user?.fullName.split(" ").join("_").toLowerCase()}
+                  </div>
                 </div>
               </MenuItem>
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
@@ -123,8 +129,8 @@ const HomePage = () => {
               top: "60px",
               height: "100%",
               overflowY: "auto",
-              borderRight: "1px solid #e0e0e0", // Added border
-              paddingRight: "3px", // Padding for border spacing
+              borderRight: "1px solid #e0e0e0",
+              paddingRight: "3px",
             }}
           >
             <Navigation />
@@ -136,11 +142,12 @@ const HomePage = () => {
             xs={12}
             lg={6}
             sx={{
-              paddingRight: "50px", // Padding for border spacing
+              paddingRight: "50px",
             }}
           >
             <Routes>
-              <Route path="/" element={<HomeSection />} />
+              <Route path="/" element={<HomeSection />}/>
+              <Route path="/" element={<Authentication />} />
               <Route path="/home" element={<HomeSection />} />
               <Route path="/profile/:id" element={<Profile />} />
               <Route path="/post/:id" element={<PostDetails />} />
