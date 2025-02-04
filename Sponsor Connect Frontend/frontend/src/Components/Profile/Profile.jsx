@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Avatar, Box, Button, Tab } from "@mui/material";
 import BusinessCenterIcon from "@mui/icons-material/BusinessCenter";
 import LocationOnIcon from '@mui/icons-material/LocationOn';
@@ -8,13 +8,21 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { TabContext, TabList, TabPanel} from "@mui/lab";
 import PostCard from "../HomeSection/PostCard";
 import ProfileModal from "./ProfileModal";
+import { useDispatch, useSelector } from "react-redux";
+import { findUserById, followUserAction } from "../../Store/Auth/Action";
+import { useEffect } from "react";
+import { getUsersPosts } from "../../Store/Post/Action";
 const Profile = () => {
   const navigate = useNavigate();
   const [openProfileModal,setOpenProfileModal]=useState(false);
+  const dispatch=useDispatch();
+  const {auth , post }=useSelector(store=>store);
+  const {id}=useParams();
     const handleOpenProfileModel = () => setOpenProfileModal(true);
     const handleClose = () => setOpenProfileModal(false);
   const handleBack = () => navigate(-1);
   const handlefollowUser = () => {
+    dispatch(followUserAction(id));
     console.log("follow user");
   };
   const  [tabValue,setTabValue]=useState("1");
@@ -27,6 +35,11 @@ const Profile = () => {
         console.log("user posts");
     }
   }
+  useEffect(() => {
+    dispatch(findUserById(id));
+    dispatch(getUsersPosts(id));
+  }, [id]);
+  console.log("auth",auth);
 
   return (
     <div>
@@ -35,7 +48,7 @@ const Profile = () => {
           className="cursor-pointer"
           onClick={handleBack}
         />
-        <h1 className="py-5 text-xl font-bold opacity-90 ml-5">Sponsor Uday</h1>
+        <h1 className="py-5 text-xl font-bold opacity-90 ml-5">{auth.findUser?.fullName}</h1>
       </section>
 
       <section>
@@ -51,10 +64,10 @@ const Profile = () => {
           <Avatar
             className="transform -translate-y-24"
             alt="uday"
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSEPtxbn85lgy1yXnB4sjytNqRDoNUV-haLQ&s"
+            src={auth.findUser?.image}
             sx={{ width: "10rem", height: "10rem", border: "4px solid white" }}
           ></Avatar>
-          {true ? (
+          {auth.findUser?.req_user? (
             <Button
               onClick={handleOpenProfileModel}
               className="rounded-full"
@@ -70,13 +83,13 @@ const Profile = () => {
               variant="contained"
               sx={{ borderRadius: "20px" }}
             >
-              {true ? "Follow" : "Unfollow"}
+              { auth.findUser?.followed?"UNFOLLOW" : "FOLLOW"}
             </Button>
           )}
         </div>
         <div>
           <div className="flex items-center">
-            <h1 className="font-bold text-lg">Uday is a cill guy</h1>
+            <h1 className="font-bold text-lg">{auth.findUser?.fullName}</h1>
             {true && (
               <img
                 src="https://i.pinimg.com/736x/a5/a8/b9/a5a8b9ce5bda5871f138603fb10ce01d.jpg"
@@ -85,10 +98,10 @@ const Profile = () => {
               ></img>
             )}
           </div>
-          <h1 className="text-grey-500">code with uday</h1>
+          <h1 className="text-grey-500">@{auth.findUser?.fullName.split(" ").join("_".toLowerCase())}</h1>
         </div>
         <div className="mt-2 space-y-3">
-          <p>Hello,I am uday , i am a chill guy ,we can chill together</p>
+          <p>{auth.findUser?.bio}</p>
           <div className="py-1 flex space-x-5">
             <div className="flex items-center text-gray-500">
               <BusinessCenterIcon />
@@ -97,7 +110,7 @@ const Profile = () => {
 
             <div className="flex items-center text-gray-500">
               <LocationOnIcon />
-              <p className="ml-2">India</p>
+              <p className="ml-2">{auth.findUser?.location}</p>
             </div>
             <div className="flex items-center text-gray-500">
               <CalendarMonthIcon/>
@@ -106,11 +119,11 @@ const Profile = () => {
           </div>
           <div className="flex items-center space-x-5">
           <div className="flex items-center space-x-1 font-semibold">
-                <span>222</span>
+                <span>{auth.findUser?.following?.length}</span>
                 <span className="text-gray-500">Following</span>
             </div>
             <div className="flex items-center space-x-1 font-semibold">
-                <span>500</span>
+                <span>{auth.findUser?.followers?.length}</span>
                 <span className="text-gray-500">Followers</span>
             </div>
           </div>
@@ -128,7 +141,8 @@ const Profile = () => {
           </TabList>
         </Box>
         <TabPanel value="1">
-            {[1,1,1,1].map((item)=><PostCard></PostCard>)}</TabPanel>
+            {post.posts.map((item)=><PostCard
+            item={item}></PostCard>)}</TabPanel>
         <TabPanel value="2">users replies</TabPanel>
         <TabPanel value="3">Media</TabPanel>
         <TabPanel value="4">Likes</TabPanel>

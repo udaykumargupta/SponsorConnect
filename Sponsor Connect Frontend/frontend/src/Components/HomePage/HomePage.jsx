@@ -147,7 +147,6 @@ const HomePage = () => {
           >
             <Routes>
               <Route path="/" element={<HomeSection />}/>
-              <Route path="/" element={<Authentication />} />
               <Route path="/home" element={<HomeSection />} />
               <Route path="/profile/:id" element={<Profile />} />
               <Route path="/post/:id" element={<PostDetails />} />

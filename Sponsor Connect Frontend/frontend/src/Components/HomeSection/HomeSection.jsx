@@ -1,11 +1,14 @@
 import { Avatar, Button } from "@mui/material";
 import { useFormik } from "formik";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
 import FmdGoodIcon from "@mui/icons-material/FmdGood";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
 import PostCard from "./PostCard";
-import PermMediaIcon from '@mui/icons-material/PermMedia';
+import PermMediaIcon from "@mui/icons-material/PermMedia";
+import { useDispatch, useSelector } from "react-redux";
+import { createPost, getAllPosts } from "../../Store/Post/Action";
+import { uploadToCloudnary } from "../../utils/uploadToCloudnary";
 
 const validationSchema = Yup.object().shape({
   content: Yup.string().required("Post text is required"),
@@ -13,23 +16,32 @@ const validationSchema = Yup.object().shape({
 
 const HomeSection = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [selectImage, setSelectedImage] = useState(null);
+  const [selectImage, setSelectedImage] = useState("");
+  const dispatch = useDispatch();
+  const { post } = useSelector((store) => store);
 
-  const handleSubmit = (value) => {
-    console.log("value", value);
+  const handleSubmit = (values,actions) => {
+    dispatch(createPost(values));
+    actions.resetForm();
+    console.log("values", values);
+    setSelectedImage("");
   };
+  useEffect(() => {
+    dispatch(getAllPosts());
+  }, [post.like, post.repost]);
   const formik = useFormik({
     initialValues: {
       content: "",
       image: "",
+      isPost: true,
     },
     onSubmit: handleSubmit,
     validationSchema,
   });
 
-  const handleSelectImage = (event) => {
+  const handleSelectImage = async (event) => {
     setUploadingImage(true);
-    const imgUrl = event.target.files[0];
+    const imgUrl = await uploadToCloudnary(event.target.files[0]);
     formik.setFieldValue("image", imgUrl);
     setSelectedImage(imgUrl);
     setUploadingImage(false);
@@ -80,6 +92,7 @@ const HomeSection = () => {
                         bgcolor: "##007bf",
                       }}
                       variant="contained"
+                      type="submit"
                     >
                       Post
                     </Button>
@@ -87,11 +100,14 @@ const HomeSection = () => {
                 </div>
               </div>
             </form>
+            <div>{selectImage && <img src={selectImage} alt="" />}</div>
           </div>
         </div>
       </section>
       <section>
-        {[1,1,1,1,1].map((item)=><PostCard/>)}
+        {post.posts.map((item) => (
+          <PostCard item={item} />
+        ))}
       </section>
     </div>
   );

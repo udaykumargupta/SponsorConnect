@@ -9,6 +9,9 @@ import FmdGoodIcon from "@mui/icons-material/FmdGood";
 import TagFacesIcon from "@mui/icons-material/TagFaces";
 import { useFormik } from 'formik';
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { createPostReply } from '../../Store/Post/Action';
+import { uploadToCloudnary } from '../../utils/uploadToCloudnary';
 
 const style = {
   position: 'absolute',
@@ -24,11 +27,15 @@ const style = {
   borderRadius:4
 };
 
-export default function ReplyModal({handleClose,open}) {
+export default function ReplyModal({handleClose,open,item}) {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectImage, setSelectedImage] = useState(null);
-  const navigate=useNavigate()
+  const dispatch=useDispatch();
+  const navigate=useNavigate();
+
   const handleSubmit=(values)=>{
+    dispatch(createPostReply(values));
+    handleClose();
     console.log("handle submit",values);
   }
   const formik=useFormik(
@@ -36,7 +43,7 @@ export default function ReplyModal({handleClose,open}) {
       initialValues:{
         content:"",
         image:"",
-        postId:""
+        postId:item?.id,
       },
       onSubmit:handleSubmit
     })
@@ -60,7 +67,7 @@ export default function ReplyModal({handleClose,open}) {
         <div className="flex space-x-5">
         <Avatar
           className="cursor-pointer"
-          OnClose={() => navigate(`/profile/${6}`)}
+          onClose={() => navigate(`/profile/${6}`)}
           alt="username"
           src="https://avatars.githubusercontent.com/u/122539779?v=4"
         ></Avatar>
@@ -127,6 +134,7 @@ export default function ReplyModal({handleClose,open}) {
                         bgcolor: "#1e88e5",
                       }}
                       variant="contained"
+                      type='submit'
                     >
                       Post
                     </Button>

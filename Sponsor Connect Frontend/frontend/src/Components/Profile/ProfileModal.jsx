@@ -5,6 +5,11 @@ import Modal from "@mui/material/Modal";
 import { useFormik } from "formik";
 import { Avatar, IconButton, TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { useDispatch, useSelector } from "react-redux";
+import { findUserById, updateUserProfile } from "../../Store/Auth/Action";
+import { uploadToCloudnary } from "../../utils/uploadToCloudnary";
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 const style = {
   position: "absolute",
   top: "50%",
@@ -19,13 +24,17 @@ const style = {
   borderRadius: 4,
 };
 
-export default function ProfileModal({open,handleClose}) {
-//   const [open, setOpen] = React.useState(false);
+export default function ProfileModal({ open, handleClose }) {
+  //   const [open, setOpen] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
-
+  const dispatch = useDispatch();
+  const [selectedImage, setSelectedImage] = React.useState("");
   const handleSubmit = (values) => {
-    console.log("handle submit",values);
+    dispatch(updateUserProfile(values));
+    console.log("handle submit", values);
+    setSelectedImage("");
   };
+  const { auth } = useSelector((store) => store);
   const formik = useFormik({
     initialValues: {
       fullName: "",
@@ -37,13 +46,17 @@ export default function ProfileModal({open,handleClose}) {
     },
     onSubmit: handleSubmit,
   });
-  const handleImageChange = (event) => {
+
+  const handleImageChange = async (event) => {
     setUploading(true);
     const { name } = event.target;
-    const file = event.target.files[0];
+    const file = await uploadToCloudnary(event.target.files[0]);
     formik.setFieldValue(name, file);
+    setSelectedImage(file);
     setUploading(false);
   };
+
+  console.log("auth",auth);
   return (
     <div>
       <Modal
@@ -88,7 +101,7 @@ export default function ProfileModal({open,handleClose}) {
                         height: "10rem",
                         border: "4px solid white",
                       }}
-                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRFCe3h5XTvHYGdpyw4zpYMBZs642mTAug-vw&s"
+                      src={selectedImage || auth.user?.image || ""}
                     />
                     <input
                       className="absolute top-0 left-0 w-[10rem] h-full opacity-0 cursor-pointer"
