@@ -69,7 +69,7 @@ public class UserController {
         return new ResponseEntity<>(userDto, HttpStatus.ACCEPTED);
     }
 
-    @PutMapping("/userId/follow")
+    @PutMapping("/{userId}/follow")
     public ResponseEntity<UserDto> followUser(@PathVariable Long userId,
                                               @RequestHeader("Authorization") String jwt)
             throws UserException {

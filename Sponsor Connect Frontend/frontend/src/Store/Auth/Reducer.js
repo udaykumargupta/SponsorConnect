@@ -50,19 +50,13 @@ export const authReducer = (state = initialState, action) => {
         error: null,
         findUser: action.payload,
       };
-      case FOLLOW_USER_SUCCESS:
-        return {
-          ...state,
-          loading: false,
-          error: null,
-          findUser: {
-            ...state.findUser,
-            followed: !state.findUser?.followed, 
-            followers: state.findUser?.followed
-              ? state.findUser?.followers.filter(user => user.id !== action.payload.id)
-              : [...state.findUser?.followers, action.payload],
-          },
-        };
+    case FOLLOW_USER_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        error: null,
+        findUser: action.payload,
+      };
     case LOGOUT:
       return initialState;
 

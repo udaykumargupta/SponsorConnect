@@ -2,11 +2,23 @@ import { Button, Grid } from "@mui/material";
 import { GoogleLogin } from "@react-oauth/google";
 import React, { useState } from "react";
 import AuthModal from "./AuthModal";
-
+// import jwt_decode from "jwt-decode";
 const Authentication = () => {
   const [openAuthModal, setOpenAuthModal] = useState(false);
   const handleOpenAuthModal = () => setOpenAuthModal(true);
   const handleCloseAuthModal = () => setOpenAuthModal(false);
+  const handleSuccess = (credentialResponse) => {
+    if (credentialResponse?.credential) {
+      // const decodedToken = jwt_decode(credentialResponse.credential);
+      // console.log("Decoded Token:", decodedToken);
+    } else {
+      console.error("Google login response is missing credentials.");
+    }
+  };
+
+  const handleError = () => {
+    console.log("LOGIN FAILED");
+  };
   return (
     <div>
       <Grid className="overflow-y-hidden" container>
@@ -74,7 +86,7 @@ const Authentication = () => {
           </h1>
           <div className="w-[60%]">
             <div className="w-full">
-              <GoogleLogin width={330}></GoogleLogin>
+            <GoogleLogin onSuccess={handleSuccess} onError={handleError} width={330} />
               <p className="py-5 text-center">OR</p>
               <Button
               onClick={handleOpenAuthModal}

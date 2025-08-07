@@ -6,43 +6,30 @@ import { useFormik } from "formik";
 import { Avatar, IconButton, TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
-import { findUserById, updateUserProfile } from "../../Store/Auth/Action";
+import { updateUserProfile } from "../../Store/Auth/Action";
 import { uploadToCloudnary } from "../../utils/uploadToCloudnary";
-import { useEffect } from "react";
-import { useParams } from "react-router-dom";
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 600,
-  bgcolor: "background.paper",
-  border: "none",
-  boxShadow: 24,
-  p: 4,
-  outline: "none",
-  borderRadius: 4,
-};
 
-export default function ProfileModal({ open, handleClose }) {
-  //   const [open, setOpen] = React.useState(false);
+// 1. Update the component to accept the `theme` prop.
+export default function ProfileModal({ open, handleClose, theme }) {
   const [uploading, setUploading] = React.useState(false);
   const dispatch = useDispatch();
-  const [selectedImage, setSelectedImage] = React.useState("");
+  const { auth } = useSelector((store) => store);
+  const [selectedImage, setSelectedImage] = React.useState(auth.user?.image || "");
+
   const handleSubmit = (values) => {
     dispatch(updateUserProfile(values));
-    console.log("handle submit", values);
     setSelectedImage("");
+    handleClose();
   };
-  const { auth } = useSelector((store) => store);
+
   const formik = useFormik({
     initialValues: {
-      fullName: "",
-      website: "",
-      location: "",
-      bio: "",
-      backgroundImage: "",
-      image: "",
+      fullName: auth.user?.fullName || "",
+      website: auth.user?.website || "",
+      location: auth.user?.location || "",
+      bio: auth.user?.bio || "",
+      backgroundImage: auth.user?.backgroundImage || "",
+      image: auth.user?.image || "",
     },
     onSubmit: handleSubmit,
   });
@@ -52,11 +39,50 @@ export default function ProfileModal({ open, handleClose }) {
     const { name } = event.target;
     const file = await uploadToCloudnary(event.target.files[0]);
     formik.setFieldValue(name, file);
-    setSelectedImage(file);
+    if (name === "image") {
+      setSelectedImage(file);
+    }
     setUploading(false);
   };
+  
+  // 2. Define a dynamic style object for the modal's Box based on the theme.
+  const style = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 600,
+    bgcolor: theme === 'dark' ? "#15202b" : "background.paper",
+    color: theme === 'dark' ? "white" : "black",
+    border: "none",
+    boxShadow: 24,
+    p: 4,
+    outline: "none",
+    borderRadius: 4,
+  };
 
-  console.log("auth",auth);
+  // 3. Define a dynamic style for TextFields
+  const textFieldStyles = {
+    "& .MuiInputBase-root": {
+      color: theme === 'dark' ? 'white' : 'black',
+      "& .MuiOutlinedInput-notchedOutline": {
+        borderColor: theme === 'dark' ? '#555' : 'rgba(0, 0, 0, 0.23)',
+      },
+      "&:hover .MuiOutlinedInput-notchedOutline": {
+        borderColor: theme === 'dark' ? '#888' : 'black',
+      },
+      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+        borderColor: '#1d9bf0',
+      },
+    },
+    "& .MuiInputLabel-root": {
+      color: theme === 'dark' ? 'gray' : 'rgba(0, 0, 0, 0.6)',
+      "&.Mui-focused": {
+        color: '#1d9bf0',
+      }
+    },
+  };
+
   return (
     <div>
       <Modal
@@ -67,30 +93,30 @@ export default function ProfileModal({ open, handleClose }) {
       >
         <Box sx={style}>
           <form onSubmit={formik.handleSubmit}>
-            <div className="flex item-center justify-between">
-              <div className="flex item-center space-x-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
                 <IconButton onClick={handleClose} aria-label="delete">
-                  <CloseIcon></CloseIcon>
+                  <CloseIcon sx={{ color: theme === 'dark' ? 'white' : 'black' }} />
                 </IconButton>
-                <p className="">Edit profile</p>
+                <p className="text-lg font-bold">Edit profile</p>
               </div>
               <Button type="submit">Save</Button>
             </div>
-            <div className=" hideScrollBar overflow-y-scroll overflow-x-hidden h-[80vh]">
+            <div className="hideScrollBar overflow-y-scroll overflow-x-hidden h-[80vh]">
               <React.Fragment>
                 <div className="w-full">
                   <div className="relative">
                     <img
-                      className="w-full h-[12 rem] object-cover object-center"
-                      src="https://c4.wallpaperflare.com/wallpaper/997/210/533/anime-attack-on-titan-attack-on-titan-levi-ackerman-wallpaper-preview.jpg"
-                      alt=""
-                    ></img>
+                      className="w-full h-[12rem] object-cover object-center"
+                      src={formik.values.backgroundImage || auth.user?.backgroundImage || "https://c4.wallpaperflare.com/wallpaper/997/210/533/anime-attack-on-titan-attack-on-titan-levi-ackerman-wallpaper-preview.jpg"}
+                      alt="background"
+                    />
                     <input
                       type="file"
                       className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
                       name="backgroundImage"
                       onChange={handleImageChange}
-                    ></input>
+                    />
                   </div>
                 </div>
                 <div className="w-full transform -translate-y-20 ml-4 h-[6rem]">
@@ -99,7 +125,8 @@ export default function ProfileModal({ open, handleClose }) {
                       sx={{
                         width: "10rem",
                         height: "10rem",
-                        border: "4px solid white",
+                        border: "4px solid",
+                        borderColor: theme === 'dark' ? '#15202b' : 'white'
                       }}
                       src={selectedImage || auth.user?.image || ""}
                     />
@@ -108,11 +135,11 @@ export default function ProfileModal({ open, handleClose }) {
                       onChange={handleImageChange}
                       name="image"
                       type="file"
-                    ></input>
+                    />
                   </div>
                 </div>
               </React.Fragment>
-              <div className="space-y-3">
+              <div className="space-y-3 px-2">
                 <TextField
                   fullWidth
                   id="fullName"
@@ -120,11 +147,8 @@ export default function ProfileModal({ open, handleClose }) {
                   label="Full Name"
                   value={formik.values.fullName}
                   onChange={formik.handleChange}
-                  error={
-                    formik.touched.fullName && Boolean(formik.errors.fullName)
-                  }
-                  helperText={formik.touched.fullName && formik.errors.fullName}
-                ></TextField>
+                  sx={textFieldStyles}
+                />
                 <TextField
                   fullWidth
                   multiline
@@ -134,9 +158,8 @@ export default function ProfileModal({ open, handleClose }) {
                   label="Bio"
                   value={formik.values.bio}
                   onChange={formik.handleChange}
-                  error={formik.touched.bio && Boolean(formik.errors.bio)}
-                  helperText={formik.touched.bio && formik.errors.bio}
-                ></TextField>
+                  sx={textFieldStyles}
+                />
                 <TextField
                   fullWidth
                   id="website"
@@ -144,11 +167,8 @@ export default function ProfileModal({ open, handleClose }) {
                   label="Website"
                   value={formik.values.website}
                   onChange={formik.handleChange}
-                  error={
-                    formik.touched.website && Boolean(formik.errors.website)
-                  }
-                  helperText={formik.touched.website && formik.errors.website}
-                ></TextField>
+                  sx={textFieldStyles}
+                />
                 <TextField
                   fullWidth
                   id="location"
@@ -156,14 +176,11 @@ export default function ProfileModal({ open, handleClose }) {
                   label="Location"
                   value={formik.values.location}
                   onChange={formik.handleChange}
-                  error={
-                    formik.touched.location && Boolean(formik.errors.location)
-                  }
-                  helperText={formik.touched.location && formik.errors.location}
-                ></TextField>
+                  sx={textFieldStyles}
+                />
                 <div className="my-3">
-                  <p className="text-lg">Birth date .Edit</p>
-                  <p className="text-2xl">October 26,1999</p>
+                  <p className="text-lg">Birth date . Edit</p>
+                  <p className="text-2xl">October 26, 1999</p>
                 </div>
                 <p className="py-3 text-lg">Edit professional Profile</p>
               </div>

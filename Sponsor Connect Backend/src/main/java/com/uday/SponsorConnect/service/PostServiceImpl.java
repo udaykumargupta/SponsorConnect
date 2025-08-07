@@ -92,9 +92,9 @@ public class PostServiceImpl implements PostService {
 
         Post savedReply=postRepository.save(post);
 
-        post.getReplyPosts().add(savedReply);
+//       post.getReplyPosts().add(savedReply);
+        replyFor.getReplyPosts().add(savedReply);
         postRepository.save(replyFor);
-
         return replyFor;
     }
 
