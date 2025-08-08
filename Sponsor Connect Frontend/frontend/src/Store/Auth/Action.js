@@ -67,7 +67,7 @@ export const findUserById = (userId) => async (dispatch) => {
   try {
     const { data } = await api.get(`/api/users/${userId}`);
 
-    dispatch({ type:FIND_USER_BY_ID_SUCCESS, payload: data });
+    dispatch({ type: FIND_USER_BY_ID_SUCCESS, payload: data });
   } catch (error) {
     console.log("error", error);
     dispatch({ type: FIND_USER_BY_ID_FAILURE, payload: error.message });
@@ -76,9 +76,9 @@ export const findUserById = (userId) => async (dispatch) => {
 
 export const updateUserProfile = (reqData) => async (dispatch) => {
   try {
-    const { data } = await api.put(`/api/users/update`,reqData);
-    console.log("update user",data)
-    dispatch({ type:UPDATE_USER_SUCCESS, payload: data });
+    const { data } = await api.put(`/api/users/update`, reqData);
+    console.log("update user", data);
+    dispatch({ type: UPDATE_USER_SUCCESS, payload: data });
   } catch (error) {
     console.log("error", error);
     dispatch({ type: UPDATE_USER_FAILURE, payload: error.message });
@@ -88,17 +88,40 @@ export const updateUserProfile = (reqData) => async (dispatch) => {
 export const followUserAction = (userId) => async (dispatch) => {
   try {
     const { data } = await api.put(`/api/users/${userId}/follow`);
-    console.log("followed user",data)
-    dispatch({ type:FOLLOW_USER_SUCCESS, payload: data });
+    console.log("followed user", data);
+    dispatch({ type: FOLLOW_USER_SUCCESS, payload: data });
   } catch (error) {
     console.log("error", error);
     dispatch({ type: FOLLOW_USER_FAILURE, payload: error.message });
   }
 };
 
+// Action to handle user login/registration via Google
+export const googleLogin = (userData) => async (dispatch) => {
+  try {
+    // We send the user data from Google to our backend.
+    // The backend will check if a user with this email already exists.
+    // If yes, it logs them in. If no, it creates a new account.
+    const { data } = await api.post(`/auth/google`, userData);
+
+    console.log("Logged in with Google: ", data);
+
+    // The backend should return a JWT token upon successful login/registration.
+    if (data.jwt) {
+      localStorage.setItem("jwt", data.jwt);
+      dispatch({ type: LOGIN_USER_SUCCESS, payload: data });
+    } else {
+      // This case might handle registration if your backend sends a different response
+      dispatch({ type: REGISTER_USER_SUCCESS, payload: data });
+    }
+  } catch (error) {
+    console.log("catch error - google login", error);
+    dispatch({ type: LOGIN_USER_FAILURE, payload: error.message });
+  }
+};
+
 export const logout = () => async (dispatch) => {
+  localStorage.removeItem("jwt");
 
-    localStorage.removeItem("jwt");
-
-    dispatch({type:LOGOUT,payload:null})
-}
+  dispatch({ type: LOGOUT, payload: null });
+};

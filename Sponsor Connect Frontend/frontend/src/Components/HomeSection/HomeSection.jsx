@@ -9,26 +9,30 @@ import PermMediaIcon from "@mui/icons-material/PermMedia";
 import { useDispatch, useSelector } from "react-redux";
 import { createPost, getAllPosts } from "../../Store/Post/Action";
 import { uploadToCloudnary } from "../../utils/uploadToCloudnary";
+import EmojiPicker from "emoji-picker-react"; // Import the emoji picker
 
 const validationSchema = Yup.object().shape({
   content: Yup.string().required("Post text is required"),
 });
 
-const HomeSection = () => {
+const HomeSection = ({ theme }) => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectImage, setSelectedImage] = useState("");
+  const [openEmojiPicker, setOpenEmojiPicker] = useState(false); // State to control picker visibility
   const dispatch = useDispatch();
-  const { post } = useSelector((store) => store);
+  const { post, auth } = useSelector((store) => store);
 
-  const handleSubmit = (values,actions) => {
+  const handleSubmit = (values, actions) => {
     dispatch(createPost(values));
     actions.resetForm();
-    console.log("values", values);
     setSelectedImage("");
+    setOpenEmojiPicker(false);
   };
+
   useEffect(() => {
     dispatch(getAllPosts());
-  }, [post.like, post.repost]);
+  }, [post.like, post.repost, dispatch]);
+
   const formik = useFormik({
     initialValues: {
       content: "",
@@ -47,6 +51,10 @@ const HomeSection = () => {
     setUploadingImage(false);
   };
 
+  const handleEmojiClick = (emojiData) => {
+    formik.setFieldValue("content", formik.values.content + emojiData.emoji);
+  };
+
   return (
     <div className="space-y-5">
       <section>
@@ -54,7 +62,7 @@ const HomeSection = () => {
       </section>
       <section className={"pb-10"}>
         <div className="flex space-x-5">
-          <Avatar alt="username" src=""></Avatar>
+          <Avatar alt="username" src={auth.user?.image}></Avatar>
           <div className="w-full">
             <form onSubmit={formik.handleSubmit}>
               <div>
@@ -62,7 +70,7 @@ const HomeSection = () => {
                   type="text"
                   name="content"
                   placeholder="Start a post"
-                  className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-100 text-sm w-full bg-transparent"
+                  className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-green-100 text-sm w-full bg-transparent text-gray-800 dark:text-white"
                   {...formik.getFieldProps("content")}
                 ></input>
                 {formik.errors.content && formik.touched.content && (
@@ -80,7 +88,11 @@ const HomeSection = () => {
                       />
                     </label>
                     <FmdGoodIcon className="text-[#d438c2]"></FmdGoodIcon>
-                    <TagFacesIcon className="text-[#1d9bf0]"></TagFacesIcon>
+                    {/* Add onClick to toggle the emoji picker */}
+                    <TagFacesIcon
+                      onClick={() => setOpenEmojiPicker(!openEmojiPicker)}
+                      className="text-[#1d9bf0] cursor-pointer"
+                    ></TagFacesIcon>
                   </div>
                   <div>
                     <Button
@@ -89,7 +101,7 @@ const HomeSection = () => {
                         borderRadius: "10px",
                         paddingY: "8px",
                         paddingX: "20px",
-                        bgcolor: "##007bf",
+                        bgcolor: "#1d9bf0", // Corrected bgcolor format
                       }}
                       variant="contained"
                       type="submit"
@@ -100,13 +112,23 @@ const HomeSection = () => {
                 </div>
               </div>
             </form>
+            {/* Conditionally render the emoji picker */}
+            {openEmojiPicker && (
+              <div className="mt-4">
+                <EmojiPicker
+                  onEmojiClick={handleEmojiClick}
+                  theme={theme === "dark" ? "dark" : "light"}
+                  width="100%"
+                />
+              </div>
+            )}
             <div>{selectImage && <img src={selectImage} alt="" />}</div>
           </div>
         </div>
       </section>
       <section>
         {post.posts.map((item) => (
-          <PostCard item={item} />
+          <PostCard key={item.id} item={item} theme={theme} />
         ))}
       </section>
     </div>

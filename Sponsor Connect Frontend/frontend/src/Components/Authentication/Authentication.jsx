@@ -1,32 +1,60 @@
 import { Button, Grid } from "@mui/material";
-import { GoogleLogin } from "@react-oauth/google";
-import React, { useState } from "react";
+import { useGoogleLogin } from "@react-oauth/google";
+import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { googleLogin } from "../../Store/Auth/Action";
 import AuthModal from "./AuthModal";
-// import jwt_decode from "jwt-decode";
-const Authentication = () => {
+import axios from "axios";
+
+const Authentication = ({ theme }) => {
   const [openAuthModal, setOpenAuthModal] = useState(false);
+  const [googleAccessToken, setGoogleAccessToken] = useState(null);
+  const dispatch = useDispatch();
+
   const handleOpenAuthModal = () => setOpenAuthModal(true);
   const handleCloseAuthModal = () => setOpenAuthModal(false);
-  const handleSuccess = (credentialResponse) => {
-    if (credentialResponse?.credential) {
-      // const decodedToken = jwt_decode(credentialResponse.credential);
-      // console.log("Decoded Token:", decodedToken);
-    } else {
-      console.error("Google login response is missing credentials.");
-    }
-  };
 
-  const handleError = () => {
-    console.log("LOGIN FAILED");
-  };
+  const login = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      console.log("Google login success, got access token:", tokenResponse);
+      setGoogleAccessToken(tokenResponse.access_token);
+    },
+    onError: (error) => {
+      console.log("LOGIN FAILED", error);
+    },
+  });
+
+  useEffect(() => {
+    if (googleAccessToken) {
+      axios.get(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+        headers: {
+          "Authorization": `Bearer ${googleAccessToken}`
+        }
+      })
+      .then(response => {
+        const userData = response.data;
+        console.log("User Profile from Google:", userData);
+
+        const backendUserData = {
+            fullName: userData.name,
+            email: userData.email,
+            image: userData.picture,
+        };
+        dispatch(googleLogin(backendUserData));
+      })
+      .catch(err => console.log(err));
+    }
+  }, [googleAccessToken, dispatch]);
+
   return (
     <div>
-      <Grid className="overflow-y-hidden" container>
+      {/* FIX: Removed overflow-y-hidden and set a specific height */}
+      <Grid container className="h-screen">
         <Grid className="hidden lg:block" item lg={7}>
           <img
-            className="w-full h-screen"
+            className="w-full h-screen object-cover"
             src="https://www.gettingsmart.com/wp-content/uploads/2020/06/sponsor-.png"
-            alt=""
+            alt="SponsorConnect background"
           />
           <div className="absolute top-[8%] left-[39%]">
             <svg
@@ -80,16 +108,28 @@ const Authentication = () => {
             </svg>
           </div>
         </Grid>
-        <Grid className="px-10" lg={5} xs={12}>
-          <h1 className="mt-20 font-bold text-4xl py-20 ">
-            Join SponsorConnect Today
-          </h1>
-          <div className="w-[60%]">
-            <div className="w-full">
-            <GoogleLogin onSuccess={handleSuccess} onError={handleError} width={330} />
-              <p className="py-5 text-center">OR</p>
+        {/* FIX: Centered the content vertically and horizontally, and made it scrollable */}
+        <Grid item lg={5} xs={12} className="flex flex-col justify-center items-center px-10 bg-white dark:bg-[#15202b]">
+          <div className="w-full max-w-md">
+            {/* FIX: Reduced excessive margins and added dark mode text color */}
+            <h1 className="font-bold text-4xl mb-8 text-gray-800 dark:text-white">
+              Join SponsorConnect Today
+            </h1>
+            <div className="w-full space-y-4">
               <Button
-              onClick={handleOpenAuthModal}
+                onClick={() => login()}
+                fullWidth
+                variant="outlined"
+                size="large"
+                sx={{ borderRadius: "10px", py: "7px" }}
+              >
+                Sign in with Google
+              </Button>
+
+              <p className="py-2 text-center text-gray-500">OR</p>
+
+              <Button
+                onClick={handleOpenAuthModal}
                 fullWidth
                 variant="contained"
                 size="large"
@@ -100,13 +140,15 @@ const Authentication = () => {
               >
                 Create Account
               </Button>
-              <p className="text-sm mt-2">
+              {/* FIX: Added dark mode text color */}
+              <p className="text-sm mt-2 text-gray-600 dark:text-gray-400">
                 By signing up, you agree to the Terms of Services and Privacy
                 Policy, including Cookies Use.
               </p>
             </div>
             <div className="mt-10">
-              <h1 className="font-bold text-xl mb-5">
+              {/* FIX: Added dark mode text color */}
+              <h1 className="font-bold text-xl mb-5 text-gray-800 dark:text-white">
                 Already have an Account?
               </h1>
               <Button
@@ -128,7 +170,8 @@ const Authentication = () => {
       <AuthModal
         open={openAuthModal}
         handleClose={handleCloseAuthModal}
-      ></AuthModal>
+        theme={theme}
+      />
     </div>
   );
 };

@@ -37,29 +37,37 @@ public class UserServiceImpl implements UserService  {
         return user;
     }
 
+    // In UserServiceImpl.java
+
     @Override
-    public User updateUser(Long userId, User user) throws UserException {
-        User user1=findUserById(userId);
+    public User updateUser(Long userId, User req) throws UserException {
+        User userToUpdate = findUserById(userId);
 
-        if(user.getFullName()!=null){
-            user1.setFullName(user.getFullName());
+        if(req.getFullName() != null){
+            userToUpdate.setFullName(req.getFullName());
         }
-        if(user.getBackgroundImage()!=null){
-            user1.setBackgroundImage(user.getBackgroundImage());
+        if(req.getImage() != null) { // Make sure you also have a check for the profile image
+            userToUpdate.setImage(req.getImage());
         }
-        if(user.getBirthDate()!=null){
-            user1.setBirthDate(user.getBirthDate());
+        if(req.getBackgroundImage() != null){
+            userToUpdate.setBackgroundImage(req.getBackgroundImage());
         }
-        if(user.getBio()!=null){
-            user1.setBio(user.getBio());
+        if(req.getBirthDate() != null){
+            userToUpdate.setBirthDate(req.getBirthDate());
         }
-        if(user.getWebsite()!=null){
-            user1.setWebsite(user.getWebsite());
+        if(req.getBio() != null){
+            userToUpdate.setBio(req.getBio());
+        }
+        if(req.getWebsite() != null){
+            userToUpdate.setWebsite(req.getWebsite());
+        }
+        if(req.getLocation() != null) { // Add a check for location as well
+            userToUpdate.setLocation(req.getLocation());
         }
 
-        return userRepository.save(user);
+        // Save the CORRECT, fully updated user object
+        return userRepository.save(userToUpdate);
     }
-
     @Override
     public User followUser(Long userId, User user) throws UserException {
         User followToUser=findUserById(userId);

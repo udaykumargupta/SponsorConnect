@@ -16,38 +16,45 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 public class JwtTokenValidator extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String jwt=request.getHeader(JwtConstant.JWT_HEADER);
-        if(jwt!=null){
-            //Bearer
-            jwt=jwt.substring(7);
+        String jwt = request.getHeader(JwtConstant.JWT_HEADER);
+
+        if (jwt != null && jwt.startsWith("Bearer ")) {
+            jwt = jwt.substring(7);
             try {
+                SecretKey key = Keys.hmacShaKeyFor(JwtConstant.SECRETE_KEY.getBytes());
+                Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
 
-                SecretKey key= Keys.hmacShaKeyFor(JwtConstant.SECRETE_KEY.getBytes());
+                String email = String.valueOf(claims.get("email"));
+                String authorities = String.valueOf(claims.get("authorities"));
 
-                Claims claims= Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(jwt).getBody();
+                List<GrantedAuthority> authoritiesList = authorities.isEmpty() || authorities.equals("null")
+                        ? Collections.emptyList()
+                        : AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
 
-                String email=String.valueOf(claims.get("email"));
-
-                String authorities=String.valueOf(claims.get("authorities"));
-
-                List<GrantedAuthority> authoritiesList= AuthorityUtils.commaSeparatedStringToAuthorityList(authorities);
-
-                Authentication auth=new UsernamePasswordAuthenticationToken(
+                Authentication auth = new UsernamePasswordAuthenticationToken(
                         email,
                         null,
                         authoritiesList
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(auth);
-            }catch (Exception e){
-                throw new RuntimeException("Invalid Token");
+
+            } catch (Exception e) {
+                // FIX: Do not throw a fatal exception.
+                // If the token is invalid, just clear the context and let the request continue.
+                // If the endpoint is protected, Spring Security will deny access later.
+                // This allows public endpoints like /auth/google to work even if a bad token is present.
+                SecurityContextHolder.clearContext();
             }
         }
-        filterChain.doFilter(request,response);
+
+        // Continue the filter chain for all requests.
+        filterChain.doFilter(request, response);
     }
 }

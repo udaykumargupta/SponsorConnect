@@ -12,13 +12,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { findUserById, followUserAction } from "../../Store/Auth/Action";
 import { getUsersPosts } from "../../Store/Post/Action";
 
-// 1. Accept `theme` as a prop
 const Profile = ({ theme }) => {
   const navigate = useNavigate();
   const [openProfileModal, setOpenProfileModal] = useState(false);
   const dispatch = useDispatch();
   const { auth, post } = useSelector(store => store);
-  const { id } = useParams();
+  const { id } = useParams(); // The ID from the URL, e.g., "/profile/123"
 
   const handleOpenProfileModel = () => setOpenProfileModal(true);
   const handleClose = () => setOpenProfileModal(false);
@@ -38,21 +37,28 @@ const Profile = ({ theme }) => {
   }, [id, dispatch]);
 
   return (
-    // 2. Apply theme to the root container of the profile page
     <div className="bg-white dark:bg-[#15202b] min-h-screen text-gray-800 dark:text-white">
-      {/* 3. Update the sticky header's background and text color */}
-      <section className={"bg-white dark:bg-[#15202b] z-50 flex items-center sticky top-0 bg-opacity-95"}>
+      <section
+        className={
+          "bg-white dark:bg-[#15202b] z-50 flex items-center sticky top-0 bg-opacity-95"
+        }
+      >
         <KeyboardBackspaceIcon
           className="cursor-pointer text-gray-800 dark:text-white"
           onClick={handleBack}
         />
-        <h1 className="py-5 text-xl font-bold opacity-90 ml-5">{auth.findUser?.fullName}</h1>
+        <h1 className="py-5 text-xl font-bold opacity-90 ml-5">
+          {auth.findUser?.fullName}
+        </h1>
       </section>
 
       <section>
         <img
           className="w-full h-[15rem] object-cover"
-          src={auth.findUser?.backgroundImage || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSEPtxbn85lgy1yXnB4sjytNqRDoNUV-haLQ&s"}
+          src={
+            auth.findUser?.backgroundImage ||
+            "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRSEPtxbn85lgy1yXnB4sjytNqRDoNUV-haLQ&s"
+          }
           alt="background"
         />
       </section>
@@ -63,15 +69,17 @@ const Profile = ({ theme }) => {
             className="transform -translate-y-24"
             alt="user avatar"
             src={auth.findUser?.image}
-            // 4. Make the avatar's border theme-aware
             sx={{
               width: "10rem",
               height: "10rem",
               border: "4px solid",
-              borderColor: theme === 'dark' ? '#15202b' : 'white'
+              borderColor: theme === "dark" ? "#15202b" : "white",
             }}
           />
-          {auth.findUser?.req_user ? (
+
+          {/* FIX: This logic directly compares the logged-in user's ID to the URL's ID. */}
+          {/* This is the most reliable way to determine if you are viewing your own profile. */}
+          {auth.user?.id.toString() === id ? (
             <Button
               onClick={handleOpenProfileModel}
               variant="contained"
@@ -85,7 +93,7 @@ const Profile = ({ theme }) => {
               variant="contained"
               sx={{ borderRadius: "20px" }}
             >
-              {auth.findUser?.followed ? "Unfollow" : "Follow"}
+              {auth.findUser?.followed ? "UNFOLLOW" : "FOLLOW"}
             </Button>
           )}
         </div>
@@ -100,8 +108,9 @@ const Profile = ({ theme }) => {
               />
             )}
           </div>
-          {/* 5. Update text colors for user handle, bio, and other info */}
-          <h1 className="text-gray-500">@{auth.findUser?.fullName.split(" ").join("_").toLowerCase()}</h1>
+          <h1 className="text-gray-500">
+            @{auth.findUser?.fullName.split(" ").join("_").toLowerCase()}
+          </h1>
         </div>
         <div className="mt-2 space-y-3">
           <p>{auth.findUser?.bio}</p>
@@ -131,24 +140,28 @@ const Profile = ({ theme }) => {
           </div>
         </div>
       </section>
-      <section className='py-5'>
-        <Box sx={{ width: '100%', typography: 'body1' }}>
+      <section className="py-5">
+        <Box sx={{ width: "100%", typography: "body1" }}>
           <TabContext value={tabValue}>
-            {/* 6. Style the tabs for dark mode */}
-            <Box sx={{ borderBottom: 1, borderColor: theme === 'dark' ? 'gray' : 'divider' }}>
+            <Box
+              sx={{
+                borderBottom: 1,
+                borderColor: theme === "dark" ? "gray" : "divider",
+              }}
+            >
               <TabList
                 onChange={handleTabChange}
                 aria-label="lab API tabs example"
                 sx={{
                   "& .Mui-selected": {
-                    color: theme === 'dark' ? '#1d9bf0 !important' : '',
+                    color: theme === "dark" ? "#1d9bf0 !important" : "",
                   },
                   "& .MuiTab-root": {
-                    color: theme === 'dark' ? 'white' : 'black',
+                    color: theme === "dark" ? "white" : "black",
                   },
                   "& .MuiTabs-indicator": {
-                    backgroundColor: '#1d9bf0',
-                  }
+                    backgroundColor: "#1d9bf0",
+                  },
                 }}
               >
                 <Tab label="Posts" value="1" />
@@ -158,18 +171,33 @@ const Profile = ({ theme }) => {
               </TabList>
             </Box>
             <TabPanel value="1">
-              {/* 7. Pass the theme prop down to the PostCard components */}
-              {post.posts.map((item) => <PostCard key={item.id} item={item} theme={theme} />)}
+              {/* FIX: Added optional chaining (?.) to prevent crash if post.posts is undefined */}
+              {post.posts?.filter(item => !item.reply).map((item) => (
+                <PostCard key={item.id} item={item} theme={theme} />
+              ))}
             </TabPanel>
-            <TabPanel value="2">users replies</TabPanel>
+            <TabPanel value="2">
+              {/* FIX: Added optional chaining (?.) here as well */}
+              {post.posts?.filter(item => item.reply).map((item) => (
+                <PostCard key={item.id} item={item} theme={theme} />
+              ))}
+            </TabPanel>
             <TabPanel value="3">Media</TabPanel>
-            <TabPanel value="4">Likes</TabPanel>
+            <TabPanel value="4">
+               {/* FIX: Added optional chaining (?.) to prevent crash if post.likedPosts is undefined */}
+               {post.likedPosts?.map((item) => (
+                <PostCard key={item.id} item={item} theme={theme} />
+              ))}
+            </TabPanel>
           </TabContext>
         </Box>
       </section>
       <section>
-        {/* 8. Pass the theme prop to the modal */}
-        <ProfileModal handleClose={handleClose} open={openProfileModal} theme={theme} />
+        <ProfileModal
+          handleClose={handleClose}
+          open={openProfileModal}
+          theme={theme}
+        />
       </section>
     </div>
   );

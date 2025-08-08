@@ -101,8 +101,7 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<Post> getUserPost(User user) {
 
-
-        return postRepository.findByRePostUserContainsOrUser_IdAndIsPostTrueOrderByCreatedAtDesc(user, user.getId());
+        return postRepository.findAllByUserId(user.getId());
     }
 
     @Override

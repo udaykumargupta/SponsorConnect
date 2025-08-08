@@ -8,13 +8,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUserProfile } from "../../Store/Auth/Action";
 import { uploadToCloudnary } from "../../utils/uploadToCloudnary";
+import { useEffect } from "react"; // Import useEffect
 
-// 1. Update the component to accept the `theme` prop.
+// Update the component to accept the `theme` prop.
 export default function ProfileModal({ open, handleClose, theme }) {
   const [uploading, setUploading] = React.useState(false);
   const dispatch = useDispatch();
   const { auth } = useSelector((store) => store);
-  const [selectedImage, setSelectedImage] = React.useState(auth.user?.image || "");
+  const [selectedImage, setSelectedImage] = React.useState("");
 
   const handleSubmit = (values) => {
     dispatch(updateUserProfile(values));
@@ -24,15 +25,33 @@ export default function ProfileModal({ open, handleClose, theme }) {
 
   const formik = useFormik({
     initialValues: {
-      fullName: auth.user?.fullName || "",
-      website: auth.user?.website || "",
-      location: auth.user?.location || "",
-      bio: auth.user?.bio || "",
-      backgroundImage: auth.user?.backgroundImage || "",
-      image: auth.user?.image || "",
+      fullName: "",
+      website: "",
+      location: "",
+      bio: "",
+      backgroundImage: "",
+      image: "",
+      birthDate: "",
     },
     onSubmit: handleSubmit,
   });
+
+  // This useEffect resets the form state whenever the modal is opened,
+  // ensuring the latest user data is always displayed.
+  useEffect(() => {
+    if (open) {
+      setSelectedImage(auth.user?.image || "");
+      formik.setValues({
+        fullName: auth.user?.fullName || "",
+        website: auth.user?.website || "",
+        location: auth.user?.location || "",
+        bio: auth.user?.bio || "",
+        backgroundImage: auth.user?.backgroundImage || "",
+        image: auth.user?.image || "",
+        birthDate: auth.user?.birthDate || "",
+      });
+    }
+  }, [open, auth.user]); // This effect runs when `open` or `auth.user` changes.
 
   const handleImageChange = async (event) => {
     setUploading(true);
@@ -45,7 +64,6 @@ export default function ProfileModal({ open, handleClose, theme }) {
     setUploading(false);
   };
   
-  // 2. Define a dynamic style object for the modal's Box based on the theme.
   const style = {
     position: "absolute",
     top: "50%",
@@ -61,7 +79,6 @@ export default function ProfileModal({ open, handleClose, theme }) {
     borderRadius: 4,
   };
 
-  // 3. Define a dynamic style for TextFields
   const textFieldStyles = {
     "& .MuiInputBase-root": {
       color: theme === 'dark' ? 'white' : 'black',
@@ -108,7 +125,8 @@ export default function ProfileModal({ open, handleClose, theme }) {
                   <div className="relative">
                     <img
                       className="w-full h-[12rem] object-cover object-center"
-                      src={formik.values.backgroundImage || auth.user?.backgroundImage || "https://c4.wallpaperflare.com/wallpaper/997/210/533/anime-attack-on-titan-attack-on-titan-levi-ackerman-wallpaper-preview.jpg"}
+                      // FIX: Point to formik's background image value
+                      src={formik.values.backgroundImage || "https://c4.wallpaperflare.com/wallpaper/997/210/533/anime-attack-on-titan-attack-on-titan-levi-ackerman-wallpaper-preview.jpg"}
                       alt="background"
                     />
                     <input
@@ -128,7 +146,8 @@ export default function ProfileModal({ open, handleClose, theme }) {
                         border: "4px solid",
                         borderColor: theme === 'dark' ? '#15202b' : 'white'
                       }}
-                      src={selectedImage || auth.user?.image || ""}
+                      // FIX: Point to formik's image value for the profile picture
+                      src={selectedImage || formik.values.image}
                     />
                     <input
                       className="absolute top-0 left-0 w-[10rem] h-full opacity-0 cursor-pointer"
@@ -178,11 +197,19 @@ export default function ProfileModal({ open, handleClose, theme }) {
                   onChange={formik.handleChange}
                   sx={textFieldStyles}
                 />
-                <div className="my-3">
-                  <p className="text-lg">Birth date . Edit</p>
-                  <p className="text-2xl">October 26, 1999</p>
-                </div>
-                <p className="py-3 text-lg">Edit professional Profile</p>
+                <TextField
+                  fullWidth
+                  id="birthDate"
+                  name="birthDate"
+                  label="Birth Date"
+                  type="date"
+                  value={formik.values.birthDate}
+                  onChange={formik.handleChange}
+                  sx={textFieldStyles}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
               </div>
             </div>
           </form>
