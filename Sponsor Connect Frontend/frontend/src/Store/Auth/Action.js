@@ -12,6 +12,8 @@ import {
   LOGOUT,
   REGISTER_USER_FAILURE,
   REGISTER_USER_SUCCESS,
+  SEARCH_USER_FAILURE,
+  SEARCH_USER_SUCCESS,
   UPDATE_USER_FAILURE,
   UPDATE_USER_REQUEST,
   UPDATE_USER_SUCCESS,
@@ -124,4 +126,15 @@ export const logout = () => async (dispatch) => {
   localStorage.removeItem("jwt");
 
   dispatch({ type: LOGOUT, payload: null });
+};
+
+export const searchUser = (query) => async (dispatch) => {
+  try {
+    const { data } = await api.get(`/api/users/search?query=${query}`);
+    console.log("search user:", data);
+    dispatch({ type: SEARCH_USER_SUCCESS, payload: data });
+  } catch (error) {
+    console.log("catch error - search user", error);
+    dispatch({ type: SEARCH_USER_FAILURE, payload: error.message });
+  }
 };

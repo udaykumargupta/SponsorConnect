@@ -101,7 +101,7 @@ const HomeSection = ({ theme }) => {
                         borderRadius: "10px",
                         paddingY: "8px",
                         paddingX: "20px",
-                        bgcolor: "#1d9bf0", // Corrected bgcolor format
+                        bgcolor: "#1d9bf0", 
                       }}
                       variant="contained"
                       type="submit"
@@ -112,7 +112,7 @@ const HomeSection = ({ theme }) => {
                 </div>
               </div>
             </form>
-            {/* Conditionally render the emoji picker */}
+
             {openEmojiPicker && (
               <div className="mt-4">
                 <EmojiPicker

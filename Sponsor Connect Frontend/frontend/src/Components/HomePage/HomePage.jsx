@@ -1,7 +1,18 @@
-import React from "react";
-import { Grid, AppBar, Toolbar, IconButton, Box, Avatar, Menu, MenuItem, Divider, ListItemIcon } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  Grid,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Box,
+  Avatar,
+  Menu,
+  MenuItem,
+  Divider,
+  ListItemIcon,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Navigation from "../Navigation/Navigation";
 import HomeSection from "../HomeSection/HomeSection";
 import Rightpart from "../RightPart/Rightpart";
@@ -9,19 +20,20 @@ import Profile from "../Profile/Profile";
 import PostDetails from "../PostDetails/PostDetails";
 import SearchIcon from "@mui/icons-material/Search";
 import Brightness4Icon from "@mui/icons-material/Brightness4"; // Moon icon (for light mode)
-import Brightness7Icon from '@mui/icons-material/Brightness7'; // Sun icon (for dark mode)
+import Brightness7Icon from "@mui/icons-material/Brightness7"; // Sun icon (for dark mode)
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../../Store/Auth/Action";
-import PersonIcon from '@mui/icons-material/Person';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { logout, searchUser } from "../../Store/Auth/Action";
+import PersonIcon from "@mui/icons-material/Person";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 // Accept `theme` and `handleChangeTheme` as props
 const HomePage = ({ theme, handleChangeTheme }) => {
-  const { auth } = useSelector(store => store);
+  const { auth } = useSelector((store) => store);
   const dispatch = useDispatch();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -34,7 +46,21 @@ const HomePage = ({ theme, handleChangeTheme }) => {
     handleClose();
     dispatch(logout());
   };
+  // 5. Handle search input changes
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
 
+  // 6. Navigate to user profile
+  const handleNavigateToProfile = (id) => {
+    navigate(`/profile/${id}`);
+    setSearchQuery(""); // Clear search after navigation
+  };
+  useEffect(() => {
+    if (searchQuery.trim() !== "") {
+      dispatch(searchUser(searchQuery));
+    }
+  }, [searchQuery, dispatch]);
   return (
     // The main background color is handled by App.js, so this Box is transparent
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -42,12 +68,12 @@ const HomePage = ({ theme, handleChangeTheme }) => {
       <AppBar
         position="fixed"
         sx={{
-          bgcolor: theme === 'dark' ? "#15202b" : "white",
-          color: theme === 'dark' ? "white" : "black",
+          bgcolor: theme === "dark" ? "#15202b" : "white",
+          color: theme === "dark" ? "white" : "black",
           boxShadow: "none",
           borderBottom: "1px solid",
-          borderColor: theme === 'dark' ? "#38444d" : "#e0e0e0",
-          transition: "background-color 0.3s, border-color 0.3s"
+          borderColor: theme === "dark" ? "#38444d" : "#e0e0e0",
+          transition: "background-color 0.3s, border-color 0.3s",
         }}
       >
         <Toolbar sx={{ minHeight: 48 }}>
@@ -73,93 +99,141 @@ const HomePage = ({ theme, handleChangeTheme }) => {
           </div>
 
           {/* Search */}
+          {/* Search */}
           <div className="relative flex items-center max-w-lg mx-auto ml-4">
             <input
               type="text"
               placeholder="Search"
+              // Connects the input's value to the searchQuery state
+              value={searchQuery}
+              // Calls the handleSearchChange function every time the user types
+              onChange={handleSearchChange}
               className="py-3 pl-12 pr-16 rounded-md w-full transition-all duration-300 ease-in-out
-                         bg-gray-100 dark:bg-gray-800
-                         text-gray-700 dark:text-gray-200
-                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+               bg-gray-100 dark:bg-gray-800
+               text-gray-700 dark:text-gray-200
+               focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="absolute left-0 top-0 flex items-center pl-4 h-full">
               <SearchIcon className="text-gray-800 dark:text-gray-300" />
             </div>
-            <IconButton onClick={handleChangeTheme} sx={{position: 'absolute', right: 4, top: '50%', transform: 'translateY(-50%)'}}>
-                {theme === "dark" ? (
-                    <Brightness7Icon className="text-yellow-400" />
-                ) : (
-                    <Brightness4Icon className="text-gray-700 hover:text-blue-500" />
-                )}
+            <IconButton
+              onClick={handleChangeTheme}
+              sx={{
+                position: "absolute",
+                right: 4,
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+            >
+              {theme === "dark" ? (
+                <Brightness7Icon className="text-yellow-400" />
+              ) : (
+                <Brightness4Icon className="text-gray-700 hover:text-blue-500" />
+              )}
             </IconButton>
+
+            {/* This block displays the search suggestions dropdown */}
+            {searchQuery && (
+              <div className="absolute top-14 w-full bg-white dark:bg-[#1e2732] border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                {auth.searchResult?.map((user) => (
+                  <div
+                    key={user.id}
+                    onClick={() => handleNavigateToProfile(user.id)}
+                    className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                  >
+                    <Avatar src={user.image} alt={user.fullName} />
+                    <div className="ml-3">
+                      <p className="font-semibold text-gray-800 dark:text-white">
+                        {user.fullName}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        @{user.fullName?.split(" ").join("_").toLowerCase()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* User Menu */}
           <div className="flex items-center space-x-3">
             <Avatar
               alt="username"
-              src={auth.user?.image || "https://media.licdn.com/dms/image/v2/D5635AQF_r_cKObJXKg/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1722740856510?e=1731398400&v=beta&t=Nw2Dcpydpw5vXXu8cBvCL4MOr-YJfCP6FUh1gWcBJnc"}
+              src={
+                auth.user?.image ||
+                "https://media.licdn.com/dms/image/v2/D5635AQF_r_cKObJXKg/profile-framedphoto-shrink_100_100/profile-framedphoto-shrink_100_100/0/1722740856510?e=1731398400&v=beta&t=Nw2Dcpydpw5vXXu8cBvCL4MOr-YJfCP6FUh1gWcBJnc"
+              }
               onClick={handleClick}
               sx={{ cursor: "pointer" }}
             />
             <Menu
-  id="user-menu"
-  anchorEl={anchorEl}
-  open={open}
-  onClose={handleClose}
-  MenuListProps={{ "aria-labelledby": "user-menu" }}
-  PaperProps={{
-    sx: {
-      // Added more styling to the dropdown container
-      overflow: 'visible',
-      filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-      mt: 1.5,
-      minWidth: 220,
-      bgcolor: theme === 'dark' ? '#1e2732' : 'white',
-      color: theme === 'dark' ? 'white' : 'black',
-      border: '1px solid',
-      borderColor: theme === 'dark' ? '#38444d' : '#e0e0e0',
-      '& .MuiAvatar-root': {
-        width: 32,
-        height: 32,
-        ml: -0.5,
-        mr: 1,
-      },
-    }
-  }}
->
-  {/* User Info Section */}
-  <MenuItem sx={{ paddingY: '12px' }}>
-    <ListItemIcon>
-        <PersonIcon fontSize="small" sx={{color: theme === 'dark' ? 'white' : 'black'}}/>
-    </ListItemIcon>
-    <div>
-      <div className="font-bold">{auth.user?.fullName}</div>
-      <div className="text-sm text-gray-500 dark:text-gray-400">
-        @{auth.user?.fullName.split(" ").join("_").toLowerCase()}
-      </div>
-    </div>
-  </MenuItem>
+              id="user-menu"
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleClose}
+              MenuListProps={{ "aria-labelledby": "user-menu" }}
+              PaperProps={{
+                sx: {
+                  // Added more styling to the dropdown container
+                  overflow: "visible",
+                  filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                  mt: 1.5,
+                  minWidth: 220,
+                  bgcolor: theme === "dark" ? "#1e2732" : "white",
+                  color: theme === "dark" ? "white" : "black",
+                  border: "1px solid",
+                  borderColor: theme === "dark" ? "#38444d" : "#e0e0e0",
+                  "& .MuiAvatar-root": {
+                    width: 32,
+                    height: 32,
+                    ml: -0.5,
+                    mr: 1,
+                  },
+                },
+              }}
+            >
+              {/* User Info Section */}
+              <MenuItem sx={{ paddingY: "12px" }}>
+                <ListItemIcon>
+                  <PersonIcon
+                    fontSize="small"
+                    sx={{ color: theme === "dark" ? "white" : "black" }}
+                  />
+                </ListItemIcon>
+                <div>
+                  <div className="font-bold">{auth.user?.fullName}</div>
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    @{auth.user?.fullName.split(" ").join("_").toLowerCase()}
+                  </div>
+                </div>
+              </MenuItem>
 
-  {/* Divider to separate info from actions */}
-  <Divider sx={{ borderColor: theme === 'dark' ? '#38444d' : '#e0e0e0' }} />
+              {/* Divider to separate info from actions */}
+              <Divider
+                sx={{ borderColor: theme === "dark" ? "#38444d" : "#e0e0e0" }}
+              />
 
-  {/* Logout Action */}
-  <MenuItem
-    onClick={handleLogout}
-    sx={{
-      paddingY: '12px',
-      '&:hover': {
-        backgroundColor: theme === 'dark' ? '#38444d' : 'rgba(0, 0, 0, 0.04)'
-      }
-    }}
-  >
-    <ListItemIcon>
-      <LogoutIcon fontSize="small" sx={{color: theme === 'dark' ? 'white' : 'black'}} />
-    </ListItemIcon>
-    Logout
-  </MenuItem>
-</Menu>
+              {/* Logout Action */}
+              <MenuItem
+                onClick={handleLogout}
+                sx={{
+                  paddingY: "12px",
+                  "&:hover": {
+                    backgroundColor:
+                      theme === "dark" ? "#38444d" : "rgba(0, 0, 0, 0.04)",
+                  },
+                }}
+              >
+                <ListItemIcon>
+                  <LogoutIcon
+                    fontSize="small"
+                    sx={{ color: theme === "dark" ? "white" : "black" }}
+                  />
+                </ListItemIcon>
+                Logout
+              </MenuItem>
+            </Menu>
           </div>
         </Toolbar>
       </AppBar>
@@ -179,7 +253,7 @@ const HomePage = ({ theme, handleChangeTheme }) => {
               height: "calc(100vh - 60px)",
               overflowY: "auto",
               borderRight: "1px solid",
-              borderColor: theme === 'dark' ? "#38444d" : "#e0e0e0",
+              borderColor: theme === "dark" ? "#38444d" : "#e0e0e0",
               paddingRight: "9px",
             }}
           >
@@ -209,11 +283,11 @@ const HomePage = ({ theme, handleChangeTheme }) => {
               height: "calc(100vh - 60px)",
               overflowY: "auto",
               borderLeft: "1px solid",
-              borderColor: theme === 'dark' ? "#38444d" : "#e0e0e0",
+              borderColor: theme === "dark" ? "#38444d" : "#e0e0e0",
               paddingLeft: "10px",
-                  '&::-webkit-scrollbar': { display: 'none' },
-              msOverflowStyle: 'none',
-    scrollbarWidth: 'none',
+              "&::-webkit-scrollbar": { display: "none" },
+              msOverflowStyle: "none",
+              scrollbarWidth: "none",
             }}
           >
             {/* FIX: Pass theme prop to Rightpart */}

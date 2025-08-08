@@ -88,6 +88,7 @@ public class UserServiceImpl implements UserService  {
 
     @Override
     public List<User> searchUser(String query) {
+        // The repository query now handles the wildcards correctly.
         return userRepository.searchUser(query);
     }
 }
